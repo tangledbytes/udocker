@@ -108,9 +108,18 @@ func transformArgsWithEnv(args []string) []string {
 }
 
 func isDockerPresent() {
-	_, err := exec.LookPath(getEnvOrDefault(EnvPrefix+"_"+"DOCKERCLI", "docker"))
+	path, err := exec.LookPath(getEnvOrDefault(EnvPrefix+"_"+"DOCKERCLI", "docker"))
 	if err != nil {
 		exit("docker binary not found")
+	}
+
+	exec, err := os.Executable()
+	if err != nil {
+		exit("failed to evaluate current binary name")
+	}
+
+	if exec == path {
+		exit("both current binary and \"docker\" point to the same executable")
 	}
 }
 
