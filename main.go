@@ -17,6 +17,14 @@ func exit(msg interface{}) {
 	os.Exit(1)
 }
 
+func getEnvOrDefault(key, def string) string {
+	if val := os.Getenv(key); val != "" {
+		return val
+	}
+
+	return def
+}
+
 func convertStringSetToFlags(set []string) []string {
 	flags := []string{}
 	for _, env := range set {
@@ -100,7 +108,7 @@ func transformArgsWithEnv(args []string) []string {
 }
 
 func isDockerPresent() {
-	_, err := exec.LookPath("docker")
+	_, err := exec.LookPath(getEnvOrDefault(EnvPrefix+"_"+"DOCKERCLI", "docker"))
 	if err != nil {
 		exit("docker binary not found")
 	}
@@ -108,7 +116,7 @@ func isDockerPresent() {
 
 func docker(args []string) {
 	newArgs := transformArgsWithEnv(args)
-	cmd := exec.Command("docker", newArgs...)
+	cmd := exec.Command(getEnvOrDefault(EnvPrefix+"_"+"DOCKERCLI", "docker"), newArgs...)
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
